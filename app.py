@@ -1,10 +1,13 @@
+# --------------- CONFIGURAÇÃO INICIAL ---------------
+# Importação de bibliotecas
 import joblib
 import os
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from scr.utils import load_data
+
+# Configuração do ambiente
 os.environ["LOKY_MAX_CPU_COUNT"] = "4"
 
 # Configurações do Streamlit
@@ -16,23 +19,73 @@ st.set_page_config(
 
 st.title("📶 Case Telco Telecom")
 
-# Dados
-df = load_data("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
-df['SeniorCitizen'] = df['SeniorCitizen'].map({0: 'No', 1: 'Yes'})
-df['TotalCharges'] = df["TotalCharges"].replace(' ', np.nan)
-df['TotalCharges'] = df["TotalCharges"].astype(float)
+# --------------- FUNÇÕES ---------------
 
-# Modelo de Classificação
+@st.cache_data
+def load_data():
+    df = pd.read_csv("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
+    df['SeniorCitizen'] = df['SeniorCitizen'].map({0: 'No', 1: 'Yes'})
+    df['TotalCharges'] = df['TotalCharges'].replace(' ', np.nan)
+    df['TotalCharges'] = df['TotalCharges'].astype(float)
+    
+    return df
+
+def plot_bar(data, x, y, color, title, barmode, xlabel, ylabel):
+    fig = px.bar(
+        data,
+        x = x,
+        y = y,
+        color = color,
+        title = title,
+        barmode = barmode,
+        labels = {x: xlabel, y: ylabel},
+        color_discrete_sequence=['#0f4c5c', '#9a031e']
+    )
+
+    fig.update_layout(
+        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+        xaxis_title = xlabel,
+        yaxis_title = ylabel,
+        showlegend = False
+    )
+
+    return fig
+
+def plot_hist(data, x, color, title, xlabel, ylabel):
+    fig = px.histogram(
+        data,
+        x = x,
+        color = color,
+        barmode = 'overlay',
+        title = title,
+        labels = {x: xlabel, 'count': ylabel},
+        color_discrete_sequence=['#0f4c5c', '#9a031e']
+    )
+
+    fig.update_layout(
+        plot_bgcolor = 'rgba(0, 0, 0, 0)',
+        xaxis_title = xlabel,
+        yaxis_title = ylabel,
+        bargap = 0.05
+    )
+
+    return fig
+
+# --------------- DADOS ---------------
+
+df = load_data()
 model = joblib.load("models/classifier.pkl")
 
+# --------------- TABS ---------------
+tab_report, tab_pred, tab_analytics = st.tabs(["📝 Relatório","🤖 Preditor", "📊 Dashboard"])
 
-tab_report, tab_home, tab_analytics = st.tabs(["📝 Relatório","🤖 Preditor", "📊 Dashboard"])
-
+# ------------- RELATÓRIO DE ANÁLISE -------------
 with tab_report:
     st.title("Relatório de Análise")
-    st.markdown("## Sumário Executivo")
-    st.write(
+    st.markdown(
         '''
+        ## Sumário Executivo
+
         **Propósito**: Identificação de padrões e insights sobre os casos de churn no terceiro trimestre de 2024.
 
         **Insights-chave**:
@@ -42,11 +95,9 @@ with tab_report:
         - Clientes que efetuam pagamentos automáticos possuem menor probabilidade de churn.
 
         ---
-        '''
-    )
-    st.markdown("## 1. Introdução")
-    st.write(
-        '''
+
+        ## 1. Introdução
+
         **Problema**: A Telco Telecom precisa de um entendimento sobre os casos de Churn para interpretar seu estado atual na empresa, e traçar ações para sua diminuição.
 
         **Origem dos Dados**: 
@@ -54,14 +105,12 @@ with tab_report:
         - CRM Interno (Tristre 3 - 2024)
         - 7043 consumidores, 21 variáveis 
 
-        **Escopo**: Foram exploradras as relações entre tipo de contrato, tempo de relacionametno e outras variáveis com casos de Churn. 
+        **Escopo**: Foram exploradras as relações entre tipo de contrato e sua duração, tipo de serviço, lifetime value, entre outras variáveis com os casos de Churn. 
 
         ---
-        '''
-    )
-    st.markdown("## 2. Dados ")
-    st.markdown(
-        '''
+
+        ## 2. Dados 
+
         ### Estrutura do Dataset
         |Feature|Descrição|
         |---|---|
@@ -98,73 +147,156 @@ with tab_report:
         ---
         '''
     )
-    st.markdown("## 3. Análise e insights")
     st.markdown(
         '''
-        ### 3.1. Taxa de Churn
-        A Telco Telecom possui uma taxa de Churn de 26.53%, enquanto a média no setor é de 31.00%
-        '''
-    )
-    img_path = "notebooks/plots/plot_2.png"
-    st.image(img_path)
-
-    st.markdown(
-        '''
-        ### 3.2. Churn x Tipo de Contrato
-        Clientes com contrato de maior duração tem uma menor proporção de Churn quando comparados com as renovações mês-a-mês. 
-        '''
-    )
-    img_path2 = "notebooks/plots/plot_4.png"
-    st.image(img_path2)
-
-    st.markdown(
-        '''
-        ### 3.3. Churn x Método de Pagamento
-        Aqueles que optam por meios de pagamento automáticos possuem uma menor chance de Churn. 
-        '''
-    )
-    img_path3 = "notebooks/plots/plot_5.png"
-    st.image(img_path3)
-
-    st.markdown(
-        '''
-        ### 3.4. Churn x Tempo de Relacionamento
-        Clientes com maior tempo de relacionamento com a operadora tem uma menor probabilidade de deixar seus serviços.
-        '''
-    )
-    img_path4 = "notebooks/plots/plot_6.png"
-    st.image(img_path4)
-
-    st.markdown(
-        '''
-        ### 3.5. Churn x Valor da Mensalidade
-        Clientes quem pagam maiores mensalidades tem uma maior probabilidade de Churn.
-        '''
-    )
-    img_path5 = "notebooks/plots/plot_7.png"
-    st.image(img_path5)
-    st.markdown("---")
-
-    st.markdown(
-        '''
-        ## 4. Conclusões e recomendações
-        - Clientes com menor tempo de relacionamento tem maior probabilidade de churn.
-        - Aqueles que pagam maiores mensalidades também são os com maior probabilidade de churn.
-        - Planos de renovação mensal são os com maior probabilidade de churn.
-        - Pagamentos automáticos são os com menor probabilidade de churn.
-
-        ### Recomendações
-        - Criar ações para fidelização de clientes, como descontos e ofertas especiais
-        - Melhorar o atendimento e oferecer vantagens exclusivas para clientes dos planos mais caros
-        - Incentivar a efetivação de planos de renovação anual e com pagamentos automáticos
-
-        É possível criar um plano de ação em forma de campanhas de marketing e novos planos de serviço para diminuir a taxa de Churn na Telco, algumas opções seriam (1) oferecer um plano anual com desconto caso o meio de pagamento escolhido seja Bank transnfer ou Credit card, (2) revisar preço e dar descontos para clientes com mais tempo de relacionamento que possuem planos mais caros para renovação anual. 
+        ## 3. Análise e insights
+        ### 3.1. Retenção de clientes
         '''
     )
 
-with tab_home:
-    st.subheader("🤖 Faça Predições")
-    st.markdown("### Insira os Dados")
+    churn = df['Churn'].value_counts(normalize = True).reset_index()
+    churn['proportion'] = (churn['proportion'] * 100).round(2)
+
+    st.plotly_chart(
+        plot_bar(
+            churn, 
+            x = 'Churn', 
+            y = 'proportion', 
+            color = 'Churn', 
+            title = 'Distribuição da Retenção de Clientes', 
+            barmode = 'relative',
+            xlabel = 'Churn', 
+            ylabel = 'Proporção'
+        ), 
+        use_container_width=True
+    )
+    st.write(
+        '''
+        A retenção de clientes é um dos grandes desafios no setor de telefonia, a Telco Telecom mantém uma taxa de retenção de 73.46% em seus contratos, com uma média de 32 meses, ou seja, pouco mais de dois anos na duração do relacionamento cliente/empresa.
+
+        O tipo de contrato firmado com maior frequência é de renovação mensal, a forma de pagamento mais comum é o eCheck (electronic check). 
+
+        ### 3.2. Serviços de internet
+        '''
+    )
+
+    internet = df.groupby(['Churn', 'InternetService']).agg(Contagem = ('InternetService', 'count')).reset_index()
+
+    st.plotly_chart(
+        plot_bar(
+            internet, 
+            x = 'InternetService', 
+            y = 'Contagem', 
+            color = 'Churn', 
+            title = 'Serviço de Internet x Churn', 
+            barmode = 'group',
+            xlabel = 'Serviço', 
+            ylabel = 'Quantidade'
+        ), 
+        use_container_width=True
+    )
+    st.markdown(
+        '''
+        O serviço de fibra ótica é o segundo mais utilizando entre os de internet mas possui uma alta proporção de churn se comparado ao DSL e clientes que não possuem internet contratada.
+
+        ### 3.3. Tipo de Contrato
+        '''
+    )
+
+    contract = df.groupby(['Churn', 'Contract']).agg(Contagem = ('Contract', 'count')).reset_index()
+    contract_plot = plot_bar(
+            contract,
+            x = 'Contract',
+            y = 'Contagem',
+            color = 'Churn',
+            title = 'Tipo de Contrato x Churn',
+            barmode = 'group',
+            xlabel = 'Tipo',
+            ylabel = 'Quantidade'
+            )
+
+    st.plotly_chart(contract_plot, use_container_width=True)
+    st.markdown(
+        '''
+        O contrato de renovação mensal é o mais frequente e o com maior proporção de Churn, os outros tipos (anual, e bi-anual) tem uma taxa proporcionalmente muito baixa e podem ser chave para o aumento da retenção.
+        
+        ### 3.4. Método de Pagamento
+        '''
+    )
+
+    pay = df.groupby(['Churn', 'PaymentMethod']).agg(Contagem = ('PaymentMethod', 'count')).reset_index()
+    pay_plot = plot_bar(
+            pay,
+            x = 'PaymentMethod',
+            y = 'Contagem',
+            color = 'Churn',
+            title = 'Método de Pagamento x Churn',
+            barmode = 'group',
+            xlabel = 'Método',
+            ylabel = 'Quantidade'
+        )
+    st.plotly_chart(pay_plot, use_container_width=True)
+
+    st.markdown(
+        '''
+        O eCheck é o método mais utilizado e o com maior proporção de Churn, um fator que chama a tenção é a baixíssima quantidade de casos em meios de pagamento automático, o que é outro ponto chave para planejar ações para aumentar a retenção de clientes.
+
+        ### 3.4. Tempo de Relacionamento
+        '''
+    )
+    tenure_plot = plot_hist(
+            df,
+            x = 'tenure',
+            color = 'Churn',
+            title = 'Distribuição de Churn por Tempo de Relacionamento',
+            xlabel = 'Meses',
+            ylabel = 'Quantidade'
+        )
+    st.plotly_chart(tenure_plot, use_container_width=True)
+    
+    st.markdown(
+        '''
+        Quanto mais tempo passamos consumindo um serviço, seja por comodidade ou apego, mais dificilmente deixaremos ele. Mas no início de contrato a atenção aos detalhes é maior, então após testar a hipotése de — clientes mais recentes tem maior probabilidade de se tornarem Churners, o comportamento foi confirmado.
+
+        ### 3.5. Fatura Mensal
+        '''
+    )
+    charges_plot = plot_hist(
+            df,
+            x = 'MonthlyCharges',
+            color = 'Churn',
+            title = 'Distribuição de Churn por Valor da Mensalidade',
+            xlabel = 'USD',
+            ylabel = 'Quantidade'
+        )
+    st.plotly_chart(charges_plot, use_container_width=True)
+    st.markdown(
+        '''
+        Assim como o comportamento em relação a contratos recentes, decidi também testar a hipotése de contratos com maiores faturas mensais estarem sob maior proabilidade de ser um casos de Churn, clientes dispostos a pagar serviços mais caros também irão exigir melhor qualidade em sua prestação — o que se tornou mais uma hipotése confirmada.
+
+        ---
+        
+        ## 4. Recomendações
+        Com a análise concluída as recomendações para o aumento da retenção de clientes foram as seguintes:
+
+        - Criar ações para fidelização de clientes com ofertas e descontos especiais.
+        - Buscar uma melhora no atendimento e oferecer vantagens nos contratos com maiores faturas mensais.
+        - Incentivar a efetivação de planos de contrato anual, e de pagamentos por vias automáticas.
+
+        Com isso em mente também sugiro criação de campanhas de marketing e novos planos de serviço na Telco, algumas opções seriam (1) oferecer um plano anual com desconto caso o método de pagamento escolhido seja um dos automáticos, e (2) revisar preços de contratos de consumidores com maior tempo de relacionamento e oferecer vatangens na renovação para planos de duração mais longa. 
+
+        ---
+
+        ## 5. Conclusões
+        A retenção média no setor é de 69%[*](https://customergauge.com/blog/average-churn-rate-by-industry), marca superada pela Telco Telecom, o que mostra um bom desempenho no terceiro trimestre mas apesar disso foram detectados vários pontos de melhora que podem aumentar a retenção dos clientes como a atenção aos planos de maior duração, e as formas  de pagamento automáticos. O bom desempenho pode ser melhorado através de ações retenção de novos clientes (contratos com menos de 6 meses), e de transição de clientes que atualmente possuem renovação mensal para planos mais longos.
+
+        '''
+    )
+
+# -------- PREDITOR DE CHURN ---------
+with tab_pred:
+    st.header("🤖 Preditor de Cancelamento de Contratos")
+    st.subheader("Insira os Dados e Calcule a Probabilidade")
 
     gender = st.selectbox("Gênero", ["Masculino", "Feminino"])
     senior = st.selectbox("Idoso", ["Sim", "Não"])
@@ -226,23 +358,23 @@ with tab_home:
     with st.container():
         if st.button("Resultado"):
             prob = model.predict_proba(input_df)[:,1][0]
-            probability = float(prob) * 100
             if prob > 0.40:
-                st.markdown("### Este cliente é um possível caso de Churn.")
-                st.write(f"A probabilidade de cancelamento é de {probability:.2f}%.")
+                st.markdown("## Alto Potencial de Cancelamento")
+                st.error(f"Probabilidade de {prob:.2%}")
             else:
-                st.markdown("### Este cliente não é um possível caso de Churn.")
-                st.write(f"A probabilidade de cancelamento é de {probability:.2f}%.")
+                st.markdown("## Baixo Potencial de Cancelamento")
+                st.success(f"Probabilidade de {prob:.2%} ")
 
+# ------------- DASHBOARD ANALÍTICO -------------
 with tab_analytics:
     st.subheader("📊 Dashboard Análitico")
-# KPIs
+    # KPIs
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         st.metric(label = "Total de Clientes", value = df.shape[0])
     with col2:
-        st.metric(label = "Taxa de Churn", value = f"{(df['Churn'].mean() * 100):.2f} %")
+        st.metric(label = "Taxa de Churn", value = f"{(df['Churn'].map({'No': 0, 'Yes': 1}).mean() * 100):.2f} %")
     with col3:
         st.metric(label = "Lifetime Value Médio", value = f"$ {df['TotalCharges'].mean():.2f}")
     with col4:
@@ -251,68 +383,56 @@ with tab_analytics:
     # Gráficos
     col1, col2 = st.columns(2)
 
-    ## Churn por Método de Pagamento
-    pm = pd.DataFrame(df[df['Churn'] == 1]['PaymentMethod'].value_counts().reset_index())
-    pm.columns = ['PaymentMethod', 'count']
-
-    fig = px.bar(pm, 
-                x = 'PaymentMethod', 
-                y = 'count', 
-                title = 'Churn por Método de Pagamento')
-
-    fig.update_layout(
-        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-        xaxis_title = 'Método',
-        yaxis_title = 'Quantidade',
-        showlegend = False
-    )
-
-    ## Churn por Tipo de Contrato
-    ct = pd.DataFrame(df[df['Churn'] == 1]['Contract'].value_counts().reset_index())
-    fig2 = px.bar(ct, x = 'Contract', y = 'count', title = "Churn por Tipo de Contrato")
-
-    fig2.update_layout(
-        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-        xaxis_title = 'Tipo',
-        yaxis_title = 'Quantidade',
-        showlegend = False
-    )
-
-    ## Churn x Tempo de Relacionamento
-    fig3 = px.histogram(
-        df, 
-        x = 'tenure', 
-        color = 'Churn', 
-        barmode = 'overlay', 
-        title = "Distribuição de Churn por Tempo de Relacionamento",
-        labels = {'tenure': 'Tempo de Relacionamento (Meses)', 'count': 'Proporção (%)'}
-    )
-
-    fig3.update_layout(
-        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-        xaxis_title = 'Meses',
-        yaxis_title = 'Contagem',
-        bargap = 0.1
-    )
-
-    ## TotalCharges x Tenure
-
-    fig4 = px.histogram(df, 
-                    x = 'MonthlyCharges',
-                    color = 'Churn',
-                    barmode = 'overlay',
-                    title = "Distribuição de Churn por Valor da Mensalidade")
-
-    fig4.update_layout(
-        plot_bgcolor = 'rgba(0, 0, 0, 0)',
-        xaxis_title = '$',
-        yaxis_title = 'Contagem',
-        bargap = 0.1
-    )
+    pm = df[df['Churn'] == 'Yes'].groupby(['Churn', 'PaymentMethod']).agg(Quantidade = ('PaymentMethod', 'count')).reset_index()
+    ct = df[df['Churn'] == 'Yes'].groupby(['Churn', 'Contract']).agg(Quantidade = ('Contract', 'count')).reset_index()
 
     with col1:
-        st.plotly_chart(fig, use_container_width=True)
-        st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(
+            plot_bar(
+                pm,
+                x = 'PaymentMethod',
+                y = 'Quantidade',
+                color = None,
+                title = 'Churn por Método de Pagamento',
+                barmode = 'relative',
+                xlabel='Método',
+                ylabel='Quantidade'
+        ),
+        use_container_width=True
+        )
+        st.plotly_chart(
+            plot_hist(
+            df,
+            x = 'tenure',
+            color = 'Churn',
+            title = 'Churn por Tempo de Relacionamento',
+            xlabel = 'Meses',
+            ylabel = 'Quantidade'
+        ),
+        use_container_width=True
+        )
     with col2:
-        st.plotly_chart(fig2, use_container_width=True)
-        st.plotly_chart(fig4, use_container_width=True)
+        st.plotly_chart(
+            plot_bar(
+                ct,
+                x = 'Contract',
+                y = 'Quantidade',
+                color = None,
+                title = 'Churn por Tipo de Contrato',
+                barmode = 'relative',
+                xlabel='Tipo',
+                ylabel='Quantidade'
+        ),
+        use_container_width=True
+        )
+        st.plotly_chart(
+            plot_hist(
+            df,
+            x = 'MonthlyCharges',
+            color = 'Churn',
+            title = 'Churn por Valor da Mensalidade',
+            xlabel = 'USD',
+            ylabel = 'Quantidade'
+        ),
+        use_container_width=True
+        )
