@@ -23,6 +23,9 @@ st.title("📶 Case Telco Telecom")
 
 @st.cache_data
 def load_data():
+    """
+    Carrega e processa os dados do arquivo .csv
+    """
     df = pd.read_csv("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
     df['SeniorCitizen'] = df['SeniorCitizen'].map({0: 'No', 1: 'Yes'})
     df['TotalCharges'] = df['TotalCharges'].replace(' ', np.nan)
@@ -31,6 +34,9 @@ def load_data():
     return df
 
 def plot_bar(data, x, y, color, title, barmode, xlabel, ylabel):
+    """
+    Cria um gráfico de barras utilizando Plotly Express
+    """
     fig = px.bar(
         data,
         x = x,
@@ -46,12 +52,14 @@ def plot_bar(data, x, y, color, title, barmode, xlabel, ylabel):
         plot_bgcolor = 'rgba(0, 0, 0, 0)',
         xaxis_title = xlabel,
         yaxis_title = ylabel,
-        showlegend = False
     )
 
     return fig
 
 def plot_hist(data, x, color, title, xlabel, ylabel):
+    """
+    Cria um histograma utilizando Plotly Express
+    """
     fig = px.histogram(
         data,
         x = x,
@@ -86,7 +94,8 @@ with tab_report:
         '''
         ## Sumário Executivo
 
-        **Propósito**: Identificação de padrões e insights sobre os casos de churn no terceiro trimestre de 2024.
+        **Propósito**: Identificação de padrões e insights sobre os casos de churn no terceiro 
+        trimestre de 2024.
 
         **Insights-chave**:
 
@@ -98,14 +107,16 @@ with tab_report:
 
         ## 1. Introdução
 
-        **Problema**: A Telco Telecom precisa de um entendimento sobre os casos de Churn para interpretar seu estado atual na empresa, e traçar ações para sua diminuição.
+        **Problema**: A Telco Telecom precisa de um entendimento sobre os casos de Churn para 
+        interpretar seu estado atual na empresa, e traçar ações para sua diminuição.
 
         **Origem dos Dados**: 
         
         - CRM Interno (Tristre 3 - 2024)
         - 7043 consumidores, 21 variáveis 
 
-        **Escopo**: Foram exploradras as relações entre tipo de contrato e sua duração, tipo de serviço, lifetime value, entre outras variáveis com os casos de Churn. 
+        **Escopo**: Foram exploradras as relações entre tipo de contrato e sua duração, tipo de serviço, 
+        lifetime value, entre outras variáveis com os casos de Churn. 
 
         ---
 
@@ -141,7 +152,8 @@ with tab_report:
         - Outliers: Não foram encontrados valores extremos.
 
         ### Limpeza e manipulação
-        - Para a análise foi necessária o ajuste da coluna `SeniorCitizen` de binário numérico (0, 1) para em forma de texto ('Yes' e 'No').
+        - Para a análise foi necessária o ajuste da coluna `SeniorCitizen` de binário numérico (0, 1) 
+        para em forma de texto ('Yes' e 'No').
         - A coluna `TotalCharges` tinha problemas com seu preenchimento que foi corrigido.
 
         ---
@@ -172,9 +184,12 @@ with tab_report:
     )
     st.write(
         '''
-        A retenção de clientes é um dos grandes desafios no setor de telefonia, a Telco Telecom mantém uma taxa de retenção de 73.46% em seus contratos, com uma média de 32 meses, ou seja, pouco mais de dois anos na duração do relacionamento cliente/empresa.
+        A retenção de clientes é um dos grandes desafios no setor de telefonia, a Telco Telecom 
+        mantém uma taxa de retenção de 73.46% em seus contratos, com uma média de 32 meses, ou seja, 
+        pouco mais de dois anos na duração do relacionamento cliente/empresa.
 
-        O tipo de contrato firmado com maior frequência é de renovação mensal, a forma de pagamento mais comum é o eCheck (electronic check). 
+        O tipo de contrato firmado com maior frequência é de renovação mensal, a forma de pagamento 
+        mais comum é o eCheck (electronic check). 
 
         ### 3.2. Serviços de internet
         '''
@@ -197,7 +212,8 @@ with tab_report:
     )
     st.markdown(
         '''
-        O serviço de fibra ótica é o segundo mais utilizando entre os de internet mas possui uma alta proporção de churn se comparado ao DSL e clientes que não possuem internet contratada.
+        O serviço de fibra ótica é o segundo mais utilizando entre os de internet mas possui uma alta 
+        proporção de churn se comparado ao DSL e clientes que não possuem internet contratada.
 
         ### 3.3. Tipo de Contrato
         '''
@@ -218,7 +234,9 @@ with tab_report:
     st.plotly_chart(contract_plot, use_container_width=True)
     st.markdown(
         '''
-        O contrato de renovação mensal é o mais frequente e o com maior proporção de Churn, os outros tipos (anual, e bi-anual) tem uma taxa proporcionalmente muito baixa e podem ser chave para o aumento da retenção.
+        O contrato de renovação mensal é o mais frequente e o com maior proporção de Churn, os outros 
+        tipos (anual, e bi-anual) tem uma taxa proporcionalmente muito baixa e podem ser chave para o 
+        aumento da retenção.
         
         ### 3.4. Método de Pagamento
         '''
@@ -239,7 +257,9 @@ with tab_report:
 
     st.markdown(
         '''
-        O eCheck é o método mais utilizado e o com maior proporção de Churn, um fator que chama a tenção é a baixíssima quantidade de casos em meios de pagamento automático, o que é outro ponto chave para planejar ações para aumentar a retenção de clientes.
+        O eCheck é o método mais utilizado e o com maior proporção de Churn, um fator que chama a 
+        tenção é a baixíssima quantidade de casos em meios de pagamento automático, o que é outro 
+        ponto chave para planejar ações para aumentar a retenção de clientes.
 
         ### 3.4. Tempo de Relacionamento
         '''
@@ -256,7 +276,9 @@ with tab_report:
     
     st.markdown(
         '''
-        Quanto mais tempo passamos consumindo um serviço, seja por comodidade ou apego, mais dificilmente deixaremos ele. Mas no início de contrato a atenção aos detalhes é maior, então após testar a hipotése de — clientes mais recentes tem maior probabilidade de se tornarem Churners, o comportamento foi confirmado.
+        Quanto mais tempo passamos consumindo um serviço, seja por comodidade ou apego, mais dificilmente
+        deixaremos ele. Mas no início de contrato a atenção aos detalhes é maior, então após testar a hipotése 
+        de — clientes mais recentes tem maior probabilidade de se tornarem Churners, o comportamento foi confirmado.
 
         ### 3.5. Fatura Mensal
         '''
@@ -272,7 +294,10 @@ with tab_report:
     st.plotly_chart(charges_plot, use_container_width=True)
     st.markdown(
         '''
-        Assim como o comportamento em relação a contratos recentes, decidi também testar a hipotése de contratos com maiores faturas mensais estarem sob maior proabilidade de ser um casos de Churn, clientes dispostos a pagar serviços mais caros também irão exigir melhor qualidade em sua prestação — o que se tornou mais uma hipotése confirmada.
+        Assim como o comportamento em relação a contratos recentes, decidi também testar a hipotése 
+        de contratos com maiores faturas mensais estarem sob maior proabilidade de ser um casos de Churn, 
+        clientes dispostos a pagar serviços mais caros também irão exigir melhor qualidade em sua prestação 
+        — o que se tornou mais uma hipotése confirmada.
 
         ---
         
@@ -283,12 +308,19 @@ with tab_report:
         - Buscar uma melhora no atendimento e oferecer vantagens nos contratos com maiores faturas mensais.
         - Incentivar a efetivação de planos de contrato anual, e de pagamentos por vias automáticas.
 
-        Com isso em mente também sugiro criação de campanhas de marketing e novos planos de serviço na Telco, algumas opções seriam (1) oferecer um plano anual com desconto caso o método de pagamento escolhido seja um dos automáticos, e (2) revisar preços de contratos de consumidores com maior tempo de relacionamento e oferecer vatangens na renovação para planos de duração mais longa. 
+        Com isso em mente também sugiro criação de campanhas de marketing e novos planos de serviço na Telco, 
+        algumas opções seriam (1) oferecer um plano anual com desconto caso o método de pagamento escolhido seja 
+        um dos automáticos, e (2) revisar preços de contratos de consumidores com maior tempo de relacionamento e 
+        oferecer vatangens na renovação para planos de duração mais longa. 
 
         ---
 
         ## 5. Conclusões
-        A retenção média no setor é de 69%[*](https://customergauge.com/blog/average-churn-rate-by-industry), marca superada pela Telco Telecom, o que mostra um bom desempenho no terceiro trimestre mas apesar disso foram detectados vários pontos de melhora que podem aumentar a retenção dos clientes como a atenção aos planos de maior duração, e as formas  de pagamento automáticos. O bom desempenho pode ser melhorado através de ações retenção de novos clientes (contratos com menos de 6 meses), e de transição de clientes que atualmente possuem renovação mensal para planos mais longos.
+        A retenção média no setor é de 69%[*](https://customergauge.com/blog/average-churn-rate-by-industry), marca 
+        superada pela Telco Telecom, o que mostra um bom desempenho no terceiro trimestre mas apesar disso foram detectados
+        vários pontos de melhora que podem aumentar a retenção dos clientes como a atenção aos planos de maior duração, e as 
+        formas  de pagamento automáticos. O bom desempenho pode ser melhorado através de ações retenção de novos clientes 
+        (contratos com menos de 6 meses), e de transição de clientes que atualmente possuem renovação mensal para planos mais longos.
 
         '''
     )
@@ -298,6 +330,7 @@ with tab_pred:
     st.header("🤖 Preditor de Cancelamento de Contratos")
     st.subheader("Insira os Dados e Calcule a Probabilidade")
 
+    # Inputs do usuário
     gender = st.selectbox("Gênero", ["Masculino", "Feminino"])
     senior = st.selectbox("Idoso", ["Sim", "Não"])
     partner = st.selectbox("Possui parceiro", ["Sim", "Não"])
@@ -317,6 +350,7 @@ with tab_pred:
     paymethod = st.selectbox("Método de Pagamento", list(df["PaymentMethod"].unique()))
     monthlycharge = st.slider("Mensalidade", 20, 120)
 
+    # Dicionário de entrada
     input_features = {
         'gender': gender,
         'SeniorCitizen': senior,
@@ -339,21 +373,21 @@ with tab_pred:
         'TotalCharges': tenure * monthlycharge
     }
 
+    # Criando DataFrame com os dados inseriados
     input_df = pd.DataFrame(input_features, index = [0])
-    input_df["gender"] = input_df["gender"].map({"Masculino": "Male", "Feminino": "Female"})
-    input_df["SeniorCitizen"] = input_df["SeniorCitizen"].map({"Sim": "Yes", "Não": "No"})
-    input_df["Partner"] = input_df["Partner"].map({"Sim": "Yes", "Não": "No"})
-    input_df["Dependents"] = input_df["Dependents"].map({"Sim": "Yes", "Não": "No"})
-    input_df["PhoneService"] = input_df["PhoneService"].map({"Sim": "Yes", "Não": "No"})
-    input_df["MultipleLines"] = input_df["MultipleLines"].map({"Sim": "Yes", "Não": "No", "Não possui linha": "No phone service"})
-    input_df["InternetService"] = input_df["InternetService"].map({"Fibra ótica": "Fiber optic", "Não": "No"})
-    input_df["OnlineSecurity"] = input_df["OnlineSecurity"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["OnlineBackup"] = input_df["OnlineBackup"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["DeviceProtection"] = input_df["DeviceProtection"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["TechSupport"] = input_df["TechSupport"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["StreamingTV"] = input_df["StreamingTV"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["StreamingMovies"] = input_df["StreamingMovies"].map({'Não': 'No', 'Sim': 'Yes', 'Não possui internet':'No internet service'})
-    input_df["PaperlessBilling"] = input_df["PaperlessBilling"].map({"Sim": "Yes", "Não": "No"})
+
+    # Mapeamento das respotas
+    mapping = {
+        'Masculino': 'Male',
+        'Feminino': 'Female',
+        'Sim': 'Yes',
+        'Não': 'No',
+        'Fibra ótica': 'Fiber optic',
+        'Não possui linha': 'No phone service',
+        'Não possui internet': 'No internet service'
+    }
+
+    input_df = input_df.applymap(lambda x: mapping.get(x, x))
 
     with st.container():
         if st.button("Resultado"):

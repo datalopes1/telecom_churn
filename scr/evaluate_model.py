@@ -6,7 +6,9 @@ from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, matthews_co
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 def evaluation(model, X_test, y_test):
-
+    """
+    Avalia o desempenho do modelo no conjunto de teste
+    """
     y_proba = model.predict_proba(X_test)[:,1]
     y_pred = model.predict(X_test)
 
@@ -19,6 +21,9 @@ def evaluation(model, X_test, y_test):
     return pd.Series(results)
 
 def cross_validation(model, X, y):
+    """
+    Executa validação cruzada usando o F1 Score
+    """
     scoring = make_scorer(f1_score)
     cv = StratifiedKFold(n_splits = 5)
 
@@ -31,15 +36,21 @@ def cross_validation(model, X, y):
     return scores.mean(), scores.std(), scores
 
 if __name__=="__main__":
+    # Carregar os dados e o modelo treinado
     data = load_data("data/raw/WA_Fn-UseC_-Telco-Customer-Churn.csv")
     model = load_model("models/classifier.pkl")
 
+    # Separar as features e target
     X = data.drop(columns = ['Churn', 'customerID'], axis = 1)
     y = data['Churn']
 
+    # Dividir os dados em treino e teste
     X_train, X_test, y_train, y_test = split_data(X, y)
 
+    # realizar a validação cruzada
     mean_f1, std_f1, all_scores = cross_validation(model, X_train, y_train)
+
+    # Avaliar o modelo no conjunto de teste
     print("\nMétricas de avaliação")
     print(f"{'-' * 25}")
     print(evaluation(model, X_test, y_test))
