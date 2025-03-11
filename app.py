@@ -112,7 +112,7 @@ with tab_report:
 
         **Origem dos Dados**: 
         
-        - CRM Interno (Tristre 3 - 2024)
+        - CRM Interno (Trimestre 3 - 2024)
         - 7043 consumidores, 21 variáveis 
 
         **Escopo**: Foram exploradras as relações entre tipo de contrato e sua duração, tipo de serviço, 
