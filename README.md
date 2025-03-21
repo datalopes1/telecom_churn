@@ -34,8 +34,8 @@ Acesse a aplicação web no [Streamlit Cloud](https://telcotelecom-churn.streaml
 #### Execução 
 1️⃣ **Clone o repositório**
 ```bash
-git clone https://github.com/seuusuario/telecom-churn.git
-cd telecom-churn
+git clone https://github.com/datalopes1/telecom_churn.git
+cd telecom_churn
 ```
 
 2️⃣ **Crie e ative um ambiente virutal (recomendado)**
